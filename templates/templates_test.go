@@ -17,6 +17,7 @@ var (
 	templateOkHostname  = "Check: {{ .Check.Name }} Entity: {{ .Entity.Name }} Hostname: {{Hostname}} !"
 	templateVarNotFound = "Check: {{ .Check.NameZZZ }} Entity: {{ .Entity.Name }} !"
 	templateInvalid     = "Check: {{ .Check.Name Entity: {{ .Entity.Name }} !"
+	templateReplace     = "Check: {{ .Check.Name | replace \"nginx\" \"sprig\" }}"
 )
 
 // Valid test
@@ -97,4 +98,14 @@ func TestEvalTemplate_InvalidTemplate(t *testing.T) {
 	result, err := EvalTemplate("templOk", templateInvalid, event)
 	assert.Equal(t, "", result)
 	assert.NotNil(t, err)
+}
+
+// Template making use of sprig function replace
+func TestEvalTemplate_SprigReplace(t *testing.T) {
+	event := &types.Event{}
+	_ = json.Unmarshal(testEventBytes, event)
+
+	result, err := EvalTemplate("templSprigReplace", templateReplace, event)
+	assert.Nil(t, err)
+	assert.Equal(t, "Check: check-sprig", result)
 }

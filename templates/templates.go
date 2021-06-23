@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"github.com/Masterminds/sprig"
 	"github.com/google/uuid"
 	"os"
 	"text/template"
@@ -17,7 +18,7 @@ func EvalTemplate(templName, templStr string, templSrc interface{}) (string, err
 		return "", fmt.Errorf("must pass in template")
 	}
 
-	templ, err := template.New(templName).Funcs(template.FuncMap{
+	templ, err := template.New(templName).Funcs(sprig.TxtFuncMap()).Funcs(template.FuncMap{
 		"UnixTime":      func(i int64) time.Time { return time.Unix(i, 0) },
 		"UUIDFromBytes": uuid.FromBytes,
 		"Hostname":      os.Hostname,
