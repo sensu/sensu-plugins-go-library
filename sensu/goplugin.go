@@ -54,6 +54,9 @@ type PluginConfigOption struct {
 
 	// If secret option do not copy Argument value into Default
 	Secret bool
+
+	// If array option set, treat StringSlice as StringArray, do not automatically parse as CSV space delimited
+	Array bool
 }
 
 // PluginConfig defines the base plugin configuration.
@@ -199,7 +202,19 @@ func setupFlag(cmd *cobra.Command, opt *PluginConfigOption) error {
 		if !ok {
 			return fmt.Errorf("only pointer to []string is allowed, not %v", kind)
 		}
-		cmd.Flags().StringSliceVarP(ptr, opt.Argument, opt.Shorthand, viper.GetStringSlice(opt.Argument), opt.Usage)
+		if opt.Array {
+			// Treat this as a StringArrayVar do not automatically parse string as space delimited list
+			// Grab the fallback envvar value as string via viper
+			val := viper.GetString(opt.Argument)
+			strSlice := []string{}
+			// If the fallback value is non-empty, append it as first string in array
+			if len(val) > 0 {
+				strSlice = append(strSlice, val)
+			}
+			cmd.Flags().StringArrayVarP(ptr, opt.Argument, opt.Shorthand, strSlice, opt.Usage)
+		} else {
+			cmd.Flags().StringSliceVarP(ptr, opt.Argument, opt.Shorthand, viper.GetStringSlice(opt.Argument), opt.Usage)
+		}
 	case reflect.String:
 		cmd.Flags().StringVarP(opt.Value.(*string), opt.Argument, opt.Shorthand, viper.GetString(opt.Argument), opt.Usage)
 	default:

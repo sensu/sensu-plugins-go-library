@@ -44,7 +44,7 @@ func TestSetOptionValue_EmptySlice(t *testing.T) {
 	assert.Equal(t, []string{""}, finalValue)
 }
 
-func TestSetOptionValue_SliceType(t *testing.T) {
+func TestSetOptionValue_StringSliceType(t *testing.T) {
 	type stringSlice []string
 	finalValue := stringSlice{"def"}
 	option := defaultOption1
@@ -54,10 +54,31 @@ func TestSetOptionValue_SliceType(t *testing.T) {
 	assert.Equal(t, stringSlice{"abc"}, finalValue)
 }
 
-func TestSetOptionValue_JSONArray(t *testing.T) {
+func TestSetOptionValue_StringArrayType(t *testing.T) {
+	type stringArray []string
+	finalValue := stringArray{"def"}
+	option := defaultOption1
+	option.Value = &finalValue
+	option.Array = true
+	err := setOptionValue(&option, "abc")
+	assert.Nil(t, err)
+	assert.Equal(t, stringArray{"abc"}, finalValue)
+}
+
+func TestSetOptionValue_JSONArrayStringSlice(t *testing.T) {
 	var finalValue []string
 	option := defaultOption1
 	option.Value = &finalValue
+	err := setOptionValue(&option, `["abc","def"]`)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"abc", "def"}, finalValue)
+}
+
+func TestSetOptionValue_JSONArrayStringArray(t *testing.T) {
+	var finalValue []string
+	option := defaultOption1
+	option.Value = &finalValue
+	option.Array = true
 	err := setOptionValue(&option, `["abc","def"]`)
 	assert.Nil(t, err)
 	assert.Equal(t, []string{"abc", "def"}, finalValue)
@@ -125,4 +146,6 @@ func clearEnvironment() {
 	_ = os.Unsetenv("ENV_1")
 	_ = os.Unsetenv("ENV_2")
 	_ = os.Unsetenv("ENV_3")
+	_ = os.Unsetenv("ENV_4")
+	_ = os.Unsetenv("ENV_5")
 }
